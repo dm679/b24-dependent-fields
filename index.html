@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Зависимые поля сделки</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- BX24 JS SDK подключается автоматически, когда страница открыта как приложение Б24 -->
+  <script src="//api.bitrix24.com/api/v1/"></script>
+</head>
+<body>
+  <form class="df-form" id="form" onsubmit="return false;">
+    <h2 class="df-title">Параметры клиента</h2>
+    <div id="fields"></div>
+    <div class="df-status" id="status">
+      <span class="df-status__dot"></span>
+      <span class="df-status__text">Загрузка…</span>
+    </div>
+  </form>
+
+  <script src="schema.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
