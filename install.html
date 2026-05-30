@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Установка приложения</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="//api.bitrix24.com/api/v1/"></script>
+</head>
+<body>
+  <div class="df-form" style="max-width:520px;">
+    <h2 class="df-title">Установка: зависимые поля сделки</h2>
+    <div class="df-status" id="status">
+      <span class="df-status__dot"></span>
+      <span class="df-status__text">Установка…</span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var HANDLER = 'https://dm679.github.io/b24-dependent-fields/index.html';
+      var statusEl = document.getElementById('status');
+      var txt = statusEl.querySelector('.df-status__text');
+      function set(state, t) {
+        statusEl.classList.remove('is-saving', 'is-saved', 'is-error');
+        if (state) statusEl.classList.add('is-' + state);
+        txt.textContent = t;
+      }
+
+      BX24.init(function () {
+        // Привязываем встройку в детальную карточку сделки.
+        BX24.callMethod('placement.bind', {
+          PLACEMENT: 'CRM_DEAL_DETAIL_TAB',
+          HANDLER: HANDLER,
+          TITLE: 'Параметры клиента',
+          DESCRIPTION: 'Зависимые поля сделки'
+        }, function (res) {
+          if (res.error() && String(res.error()).indexOf('exist') === -1) {
+            set('error', 'Ошибка привязки: ' + res.error());
+          } else {
+            set('saved', 'Установлено ✓ Откройте карточку сделки.');
+          }
+          // Завершаем установку приложения в любом случае.
+          if (BX24.installFinish) BX24.installFinish();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
