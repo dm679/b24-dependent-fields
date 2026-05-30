@@ -103,3 +103,21 @@ textarea.df-input { resize: vertical; }
 .df-status.is-saving .df-status__dot { background: #f6b73c; }
 .df-status.is-saved  .df-status__dot { background: #3ecf8e; }
 .df-status.is-error  .df-status__dot { background: #ef5350; }
+
+/* Админ-панель (режим настройки, открыто из меню) */
+.df-admin { margin-bottom: 18px; }
+.df-admin__hint { font-size: 13px; color: var(--df-label); margin: 0 0 10px; }
+.df-admin__hint code { background: #eef1f4; padding: 1px 5px; border-radius: 5px; }
+.df-btn {
+  appearance: none; border: 0; cursor: pointer;
+  background: var(--df-accent); color: #fff; font-weight: 600;
+  font-size: 13px; padding: 10px 14px; border-radius: 10px;
+  margin: 0 8px 10px 0;
+}
+.df-btn--ghost { background: #eef1f4; color: var(--df-text); }
+.df-admin__log {
+  margin: 6px 0 14px; font-size: 12px; line-height: 1.5;
+  background: #0f1729; color: #cbd5e1; border-radius: 10px;
+  padding: 12px 14px; white-space: pre-wrap; min-height: 20px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
