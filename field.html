@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Зависимые поля (инлайн)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="//api.bitrix24.com/api/v1/"></script>
+  <style>
+    /* В инлайн-режиме внутри карточки убираем внешнюю «карточку»-рамку и отступы */
+    body { background: transparent; padding: 0; }
+    .df-form { border: 0; box-shadow: none; padding: 0; max-width: 100%; }
+    .df-title { display: none; }
+  </style>
+</head>
+<body>
+  <form class="df-form" id="form" onsubmit="return false;">
+    <div id="fields"></div>
+    <div class="df-status" id="status">
+      <span class="df-status__dot"></span>
+      <span class="df-status__text">Загрузка…</span>
+    </div>
+  </form>
+
+  <script src="schema.js"></script>
+  <script src="engine.js"></script>
+  <script>
+    (function () {
+      var statusEl = document.getElementById('status');
+      var statusText = statusEl.querySelector('.df-status__text');
+      var FIELD_CODES = window.FORM_SCHEMA.map(function (f) { return f.code; });
+      var form = null, dealId = null, saveTimer = null;
+
+      function setStatus(state, t) {
+        statusEl.classList.remove('is-saving', 'is-saved', 'is-error');
+        if (state) statusEl.classList.add('is-' + state);
+        statusText.textContent = t;
+      }
+
+      // Подгоняем высоту iframe под контент при появлении/скрытии полей.
+      function autosize() {
+        var h = document.body.scrollHeight || document.documentElement.scrollHeight;
+        if (BX24 && BX24.resizeWindow) BX24.resizeWindow(document.body.scrollWidth, h);
+        else if (BX24 && BX24.fitWindow) BX24.fitWindow();
+      }
+
+      function scheduleSave() {
+        if (saveTimer) clearTimeout(saveTimer);
+        setStatus('saving', 'Сохранение…');
+        saveTimer = setTimeout(saveNow, 600);
+      }
+      function saveNow() {
+        if (!dealId) { setStatus('error', 'Нет ID сделки'); return; }
+        var values = form.getValues(), fields = {};
+        FIELD_CODES.forEach(function (c) { fields[c] = values[c] || ''; });
+        BX24.callMethod('crm.deal.update', { id: dealId, fields: fields }, function (res) {
+          setStatus(res.error() ? 'error' : 'saved', res.error() ? 'Ошибка' : 'Сохранено');
+        });
+      }
+
+      function start() {
+        var info = BX24.placement.info ? BX24.placement.info() : null;
+        var o = (info && info.options) || {};
+        // В контексте пользовательского типа поля ID сущности приходит так:
+        dealId = o.ENTITY_VALUE_ID || o.ID || o.ENTITY_ID || null;
+
+        form = new DependentForm({
+          root: document.getElementById('fields'),
+          schema: window.FORM_SCHEMA,
+          onChange: function () { scheduleSave(); setTimeout(autosize, 320); },
+        });
+
+        if (!dealId) {
+          setStatus(null, 'Сделка не определена (демо)');
+          form.setValues({});
+          autosize();
+          return;
+        }
+
+        BX24.callMethod('crm.deal.get', { id: dealId }, function (res) {
+          if (res.error()) { setStatus('error', 'Не удалось загрузить сделку'); return; }
+          var deal = res.data(), initial = {};
+          FIELD_CODES.forEach(function (c) { initial[c] = deal[c] || ''; });
+          form.setValues(initial);
+          setStatus('saved', 'Готово');
+          setTimeout(autosize, 320);
+        });
+      }
+
+      if (typeof BX24 !== 'undefined') { BX24.init(start); }
+      else {
+        form = new DependentForm({ root: document.getElementById('fields'), schema: window.FORM_SCHEMA, onChange: function(){} });
+        form.setValues({});
+        setStatus(null, 'Локальное демо');
+      }
+    })();
+  </script>
+</body>
+</html>
