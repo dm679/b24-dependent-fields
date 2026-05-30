@@ -18,7 +18,9 @@
 
   <script>
     (function () {
-      var HANDLER = 'https://dm679.github.io/b24-dependent-fields/index.html';
+      // Адрес обработчика вычисляем от текущего расположения install.html,
+      // чтобы работало и на GitHub Pages, и при ZIP-хостинге внутри Битрикса.
+      var HANDLER = new URL('index.html', location.href).href;
       var statusEl = document.getElementById('status');
       var txt = statusEl.querySelector('.df-status__text');
       function set(state, t) {
